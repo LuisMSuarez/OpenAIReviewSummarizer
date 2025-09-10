@@ -13,4 +13,4 @@ concurrently([
         cwd: "packages/client",
         prefixColor: "green"
     },
-])
+]);
