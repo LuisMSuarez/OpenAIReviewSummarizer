@@ -1,33 +1,49 @@
 import OpenAI from 'openai';
-import { conversationRespository } from '../repositories/conversation.repository';
-
-const openAiClient = new OpenAI({
-   apiKey: process.env.OPENAI_API_KEY,
-});
+import {
+   ConversationRepository,
+   conversationRepository,
+} from '../repositories/conversation.repository';
 
 interface ChatResponse {
    id: string;
    message: string;
 }
 
-export const chatService = {
+class ChatService {
+   constructor(
+      private readonly openAiClient: OpenAI,
+      private readonly conversationRepository: ConversationRepository
+   ) {}
+
    async sendMessage(
       prompt: string,
       conversationId: string
    ): Promise<ChatResponse> {
-      const response = await openAiClient.responses.create({
+      const response = await this.openAiClient.responses.create({
          model: 'gpt-4o-mini',
          input: prompt,
          temperature: 0.2,
          max_output_tokens: 100,
          previous_response_id:
-            conversationRespository.getLastResponseId(conversationId),
+            this.conversationRepository.getLastResponseId(conversationId),
       });
 
-      conversationRespository.setLastResponseId(conversationId, response.id);
+      this.conversationRepository.setLastResponseId(
+         conversationId,
+         response.id
+      );
       return {
          id: conversationId,
          message: response.output_text,
       };
-   },
-};
+   }
+}
+
+const openAiClient = new OpenAI({
+   apiKey: process.env.OPENAI_API_KEY,
+});
+
+export const chatService = new ChatService(
+   openAiClient,
+   conversationRepository
+);
