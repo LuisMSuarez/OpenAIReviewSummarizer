@@ -2,10 +2,11 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import OpenAI from 'openai';
+import z from 'zod';
 
 dotenv.config();
 
-const client = new OpenAI({
+const openAiClient = new OpenAI({
    apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -27,11 +28,23 @@ let lastResponseId: string | null = null;
 // in order to preserve conversation history we use a
 // dictionary to store last responseId given a conversationid
 const conversations = new Map<string, string>();
+const chatSchema = z.object({
+   prompt: z
+      .string()
+      .trim()
+      .min(1, 'Prompt is required.')
+      .max(1000, 'Prompt is too long.'),
+   conversationId: z.uuid(),
+});
 
 app.post('/api/chat', async (req: Request, res: Response) => {
+   const parseResult = chatSchema.safeParse(req.body);
+   if (!parseResult.success) {
+      res.status(400).json(z.treeifyError(parseResult.error));
+   }
    const { prompt, conversationId } = req.body;
 
-   const response = await client.responses.create({
+   const response = await openAiClient.responses.create({
       model: 'gpt-4o-mini',
       input: prompt,
       temperature: 0.2,
