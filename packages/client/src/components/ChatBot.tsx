@@ -2,25 +2,31 @@ import { useForm } from 'react-hook-form';
 import { Button } from './ui/button';
 import { FaArrowUp } from 'react-icons/fa';
 import axios from 'axios';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 type FormData = {
    prompt: string;
 };
 
+type ChatResponse = {
+   message: string;
+};
+
 const ChatBot = () => {
+   const [messages, setMessages] = useState<string[]>([]);
    // useRef(...) stores that value in a ref object that persists across re-renders.
    // So conversationId.current will always hold the same UUID for the lifetime of the component.
    const conversationId = useRef(crypto.randomUUID());
    const { register, handleSubmit, reset, formState } = useForm<FormData>();
 
    const onSubmit = async ({ prompt }: FormData) => {
+      setMessages([...messages, prompt]); // add user's message
       reset();
-      const { data } = await axios.post('/api/chat', {
+      const { data } = await axios.post<ChatResponse>('/api/chat', {
          prompt,
          conversationId: conversationId.current,
       });
-      console.log(data);
+      setMessages([...messages, data.message]);
    };
 
    const onKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
