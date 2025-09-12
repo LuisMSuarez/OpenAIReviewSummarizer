@@ -37,7 +37,11 @@ const ChatBot = () => {
             maxLength={1000}
          />
 
-         <Button disabled={!formState.isValid} className="rounded-full w-9 h-9">
+         <Button
+            type="submit"
+            disabled={!formState.isValid}
+            className="rounded-full w-9 h-9"
+         >
             <FaArrowUp />
          </Button>
       </form>
