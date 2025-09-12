@@ -1,7 +1,13 @@
 import express from 'express';
+import type { Request, Response } from 'express';
+import { chatController } from './controllers/chat.controller';
 
-app.get('/api/ping', (req: Request, res: Response) => {
+const router = express.Router();
+
+router.get('/api/ping', (req: Request, res: Response) => {
    res.json({ message: 'Success!' });
 });
 
-app.post('/api/chat', chatController.sendMessage);
+router.post('/api/chat', chatController.sendMessage);
+
+export default router;

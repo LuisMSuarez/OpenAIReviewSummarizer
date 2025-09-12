@@ -1,6 +1,6 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import router from './routes';
-import dotenv from 'dotenv';
 
 dotenv.config();
 
