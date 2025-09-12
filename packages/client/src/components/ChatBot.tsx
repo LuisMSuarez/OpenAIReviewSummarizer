@@ -37,8 +37,8 @@ const ChatBot = () => {
    };
 
    return (
-      <div>
-         <div>
+      <div id="chatArea">
+         <div id="messages">
             {messages.map((message, index) => (
                <p key={index}>{message}</p>
             ))}
