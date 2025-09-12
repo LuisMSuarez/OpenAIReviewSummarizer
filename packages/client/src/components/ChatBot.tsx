@@ -20,13 +20,13 @@ const ChatBot = () => {
    const { register, handleSubmit, reset, formState } = useForm<FormData>();
 
    const onSubmit = async ({ prompt }: FormData) => {
-      setMessages([...messages, prompt]); // add user's message
+      setMessages((prev) => [...prev, prompt]); // add user's message
       reset();
       const { data } = await axios.post<ChatResponse>('/api/chat', {
          prompt,
          conversationId: conversationId.current,
       });
-      setMessages([...messages, data.message]);
+      setMessages((prev) => [...prev, data.message]); // using prev syntax to ensure we get latest copy of state
    };
 
    const onKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
@@ -37,29 +37,36 @@ const ChatBot = () => {
    };
 
    return (
-      <form
-         onSubmit={handleSubmit(onSubmit)}
-         onKeyDown={onKeyDown}
-         className="flex flex-col gap-2 items-end border-2 p-4 rounded-3xl"
-      >
-         <textarea
-            {...register('prompt', {
-               required: true,
-               validate: (data) => data.trim().length > 0,
-            })}
-            className="w-full border-0 focus:outline-0 resize-none"
-            placeholder="Ask anything"
-            maxLength={1000}
-         />
-
-         <Button
-            type="submit"
-            disabled={!formState.isValid}
-            className="rounded-full w-9 h-9"
+      <div>
+         <div>
+            {messages.map((message, index) => (
+               <p key={index}>{message}</p>
+            ))}
+         </div>
+         <form
+            onSubmit={handleSubmit(onSubmit)}
+            onKeyDown={onKeyDown}
+            className="flex flex-col gap-2 items-end border-2 p-4 rounded-3xl"
          >
-            <FaArrowUp />
-         </Button>
-      </form>
+            <textarea
+               {...register('prompt', {
+                  required: true,
+                  validate: (data) => data.trim().length > 0,
+               })}
+               className="w-full border-0 focus:outline-0 resize-none"
+               placeholder="Ask anything"
+               maxLength={1000}
+            />
+
+            <Button
+               type="submit"
+               disabled={!formState.isValid}
+               className="rounded-full w-9 h-9"
+            >
+               <FaArrowUp />
+            </Button>
+         </form>
+      </div>
    );
 };
 
