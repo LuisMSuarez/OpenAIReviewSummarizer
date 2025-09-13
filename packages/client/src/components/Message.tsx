@@ -1,3 +1,5 @@
+import ReactMarkdown from 'react-markdown';
+
 type ChatMessage = {
    message: string;
    sender: 'client' | 'server';
@@ -16,7 +18,9 @@ const Message = ({ message }: Props) => {
             border-2 rounded-3xl p-4 max-w-xs
          `}
       >
-         <p>{message.message}</p>
+         <p>
+            <ReactMarkdown>{message.message}</ReactMarkdown>
+         </p>
       </div>
    );
 };
