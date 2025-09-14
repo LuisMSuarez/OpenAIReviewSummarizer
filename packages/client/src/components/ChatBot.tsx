@@ -9,9 +9,10 @@ type FormData = {
    prompt: string;
 };
 
-type ChatMessage = {
+export type ChatMessage = {
    message: string;
    sender: 'client' | 'server';
+   state: 'pending' | 'complete';
 };
 
 type ChatResponse = {
@@ -26,15 +27,23 @@ const ChatBot = () => {
    const { register, handleSubmit, reset, formState } = useForm<FormData>();
 
    const onSubmit = async ({ prompt }: FormData) => {
-      setMessages((prev) => [...prev, { message: prompt, sender: 'client' }]); // add user's message
+      setMessages((prev) => [
+         ...prev,
+         { message: prompt, sender: 'client', state: 'complete' },
+      ]); // add user's message
       reset();
+      // inject server 'pending' message
+      setMessages((prev) => [
+         ...prev,
+         { message: '...', sender: 'server', state: 'pending' },
+      ]); // using prev syntax to ensure we get latest copy of state
       const { data } = await axios.post<ChatResponse>('/api/chat', {
          prompt,
          conversationId: conversationId.current,
       });
       setMessages((prev) => [
-         ...prev,
-         { message: data.message, sender: 'server' },
+         ...prev.filter((message) => message.state != 'pending'),
+         { message: data.message, sender: 'server', state: 'complete' },
       ]); // using prev syntax to ensure we get latest copy of state
    };
 
