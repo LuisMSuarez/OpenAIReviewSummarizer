@@ -1,28 +1,23 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import './Message.css';
-
-type ChatMessage = {
-   message: string;
-   sender: 'client' | 'server';
-};
+import type { ChatMessage } from './ChatBot';
+import Thinking from './Thinking';
 
 interface Props {
    message: ChatMessage;
 }
 
 const Message = ({ message }: Props) => {
-   const isClient = message.sender === 'client';
+   const { sender, state, message: content } = message;
+   const bgColor = sender === 'client' ? 'bg-red-300' : 'bg-blue-300';
+
    return (
-      <div
-         className={`
-            ${isClient ? 'bg-red-300' : 'bg-blue-300'}
-            border-2 rounded-3xl p-4 max-w-xs markdown
-         `}
-      >
-         <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {message.message}
-         </ReactMarkdown>
+      <div className={`border-2 rounded-3xl p-4 max-w-xs markdown ${bgColor}`}>
+         {state === 'pending' && <Thinking />}
+         {state === 'complete' && (
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+         )}
       </div>
    );
 };
