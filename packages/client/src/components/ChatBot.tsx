@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from './ui/button';
 import { FaArrowUp } from 'react-icons/fa';
 import axios from 'axios';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Message from './Message';
 
 type FormData = {
@@ -24,8 +24,13 @@ const ChatBot = () => {
    // useRef(...) stores that value in a ref object that persists across re-renders.
    // So conversationId.current will always hold the same UUID for the lifetime of the component.
    const conversationId = useRef(crypto.randomUUID());
+   const formRef = useRef<HTMLFormElement | null>(null);
    const { register, handleSubmit, reset, formState } = useForm<FormData>();
-
+   useEffect(() => {
+      // scroll down to the form as messages are added both from
+      // the client and the server
+      formRef.current?.scrollIntoView({ behavior: 'smooth' });
+   }, [messages]);
    const onSubmit = async ({ prompt }: FormData) => {
       setMessages((prev) => [
          ...prev,
@@ -69,6 +74,7 @@ const ChatBot = () => {
          <form
             onSubmit={handleSubmit(onSubmit)}
             onKeyDown={onKeyDown}
+            ref={formRef}
             className="flex flex-col gap-2 border-2 p-4 rounded-3xl"
          >
             <textarea
