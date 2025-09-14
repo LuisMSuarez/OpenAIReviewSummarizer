@@ -1,4 +1,6 @@
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import './Message.css';
 
 type ChatMessage = {
    message: string;
@@ -15,12 +17,12 @@ const Message = ({ message }: Props) => {
       <div
          className={`
             ${isClient ? 'bg-red-300' : 'bg-blue-300'}
-            border-2 rounded-3xl p-4 max-w-xs
+            border-2 rounded-3xl p-4 max-w-xs markdown
          `}
       >
-         <p>
-            <ReactMarkdown>{message.message}</ReactMarkdown>
-         </p>
+         <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {message.message}
+         </ReactMarkdown>
       </div>
    );
 };
