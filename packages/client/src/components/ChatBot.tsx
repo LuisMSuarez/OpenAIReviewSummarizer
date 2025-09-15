@@ -24,19 +24,19 @@ const ChatBot = () => {
    // useRef(...) stores that value in a ref object that persists across re-renders.
    // So conversationId.current will always hold the same UUID for the lifetime of the component.
    const conversationId = useRef(crypto.randomUUID());
-   const formRef = useRef<HTMLFormElement | null>(null);
+   const lastMessageRef = useRef<HTMLDivElement | null>(null);
    const { register, handleSubmit, reset, formState } = useForm<FormData>();
    useEffect(() => {
-      // scroll down to the form as messages are added both from
-      // the client and the server
-      formRef.current?.scrollIntoView({ behavior: 'smooth' });
+      // sas messages are added from the client or server,
+      // scroll down to the last message in a smooth transition
+      lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
    }, [messages]);
    const onSubmit = async ({ prompt }: FormData) => {
       setMessages((prev) => [
          ...prev,
          { message: prompt, sender: 'client', state: 'complete' },
       ]); // add user's message
-      reset();
+      reset({ prompt: '' });
       // inject server 'pending' message
       setMessages((prev) => [
          ...prev,
@@ -59,12 +59,23 @@ const ChatBot = () => {
       }
    };
 
+   // Messages div use flex-1 and form div uses flex-0 within the parent flex-col chatarea component
+   // this means that the messages will grow take up all remaining area that is not required for rendering the form
+   // which is pushed to the bottom.
+   // The overall height of the chat area is h-full, 100% of the height that its parent will allow
+   // in this case, the parent is in app.tsx, where the chatbot is rendered, most likely h-screen, 100% of the viewport height
+   // Overflow-y-auto adds a vertical scrollbar only if the content overflows the container’s height.
+   // if the content fits, no scrollbar is shown
    return (
-      <div id="chatArea">
-         <div id="messages" className="flex flex-col gap-3 mb-2">
+      <div id="chatArea" className="flex flex-col h-full w-full">
+         <div
+            id="messages"
+            className="flex flex-col flex-1 gap-3 mb-2 overflow-y-auto"
+         >
             {messages.map((message, index) => (
                <div
                   key={index}
+                  ref={index == messages.length - 1 ? lastMessageRef : null}
                   className={`flex ${message.sender === 'client' ? 'self-start' : 'self-end'}`}
                >
                   <Message message={message} />
@@ -74,14 +85,14 @@ const ChatBot = () => {
          <form
             onSubmit={handleSubmit(onSubmit)}
             onKeyDown={onKeyDown}
-            ref={formRef}
-            className="flex flex-col gap-2 border-2 p-4 rounded-3xl"
+            className="flex flex-0 flex-col gap-2 border-2 p-4 rounded-3xl"
          >
             <textarea
                {...register('prompt', {
                   required: true,
                   validate: (data) => data.trim().length > 0,
                })}
+               autoFocus
                className="w-full border-0 focus:outline-0 resize-none"
                placeholder="Ask anything"
                maxLength={1000}
