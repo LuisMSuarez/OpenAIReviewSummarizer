@@ -12,20 +12,20 @@ interface Props {
 
 const ChatInput = ({ onSubmit }: Props) => {
    const { register, handleSubmit, reset, formState } = useForm<ChatFormData>();
-   const handleFormSubmit = handleSubmit((data) => {
+   const submit = handleSubmit((data) => {
       reset({ prompt: '' });
       onSubmit(data);
    });
    const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
       if (e.key == 'Enter' && !e.shiftKey) {
          e.preventDefault(); // avoid default behavior of enter key
-         handleSubmit(onSubmit)();
+         submit();
       }
    };
 
    return (
       <form
-         onSubmit={handleFormSubmit}
+         onSubmit={submit}
          onKeyDown={handleKeyDown}
          className="flex flex-0 flex-col gap-2 border-2 p-4 rounded-3xl"
       >
