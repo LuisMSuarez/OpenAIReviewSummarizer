@@ -21,6 +21,7 @@ type ChatResponse = {
 
 const ChatBot = () => {
    const [messages, setMessages] = useState<ChatMessage[]>([]);
+   const [error, setError] = useState<string>('');
    // useRef(...) stores that value in a ref object that persists across re-renders.
    // So conversationId.current will always hold the same UUID for the lifetime of the component.
    const conversationId = useRef(crypto.randomUUID());
@@ -32,24 +33,36 @@ const ChatBot = () => {
       lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
    }, [messages]);
    const onSubmit = async ({ prompt }: FormData) => {
-      setMessages((prev) => [
-         ...prev,
-         { message: prompt, sender: 'client', state: 'complete' },
-      ]); // add user's message
-      reset({ prompt: '' });
-      // inject server 'pending' message
-      setMessages((prev) => [
-         ...prev,
-         { message: '...', sender: 'server', state: 'pending' },
-      ]); // using prev syntax to ensure we get latest copy of state
-      const { data } = await axios.post<ChatResponse>('/api/chat', {
-         prompt,
-         conversationId: conversationId.current,
-      });
-      setMessages((prev) => [
-         ...prev.filter((message) => message.state != 'pending'),
-         { message: data.message, sender: 'server', state: 'complete' },
-      ]); // using prev syntax to ensure we get latest copy of state
+      try {
+         setError('');
+         setMessages((prev) => [
+            ...prev,
+            { message: prompt, sender: 'client', state: 'complete' },
+         ]); // add user's message
+         reset({ prompt: '' });
+         // inject server 'pending' message
+         setMessages((prev) => [
+            ...prev,
+            { message: '...', sender: 'server', state: 'pending' },
+         ]); // using prev syntax to ensure we get latest copy of state
+         const { data } = await axios.post<ChatResponse>('/api/chat', {
+            prompt,
+            conversationId: conversationId.current,
+         });
+         // add the completed message
+         setMessages((prev) => [
+            ...prev,
+            { message: data.message, sender: 'server', state: 'complete' },
+         ]);
+      } catch (error) {
+         console.error(error);
+         setError('Sorry, something went wrong, please try again!');
+      } finally {
+         // always remove pending message from the server
+         setMessages((prev) => [
+            ...prev.filter((message) => message.state != 'pending'),
+         ]);
+      }
    };
 
    const onKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
@@ -81,6 +94,7 @@ const ChatBot = () => {
                   <Message message={message} />
                </div>
             ))}
+            {error && <p className="text-red-500">{error}</p>}
          </div>
          <form
             onSubmit={handleSubmit(onSubmit)}
