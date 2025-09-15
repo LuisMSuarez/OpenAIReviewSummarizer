@@ -1,14 +1,8 @@
-import { useForm } from 'react-hook-form';
-import { Button } from './ui/button';
-import { FaArrowUp } from 'react-icons/fa';
 import axios from 'axios';
 import { useRef, useState } from 'react';
 import MessageList from './MessageList';
 import type { ChatMessage } from '@/entities/ChatMessage';
-
-type FormData = {
-   prompt: string;
-};
+import ChatInput, { type ChatFormData } from './ChatInput';
 
 type ChatResponse = {
    message: string;
@@ -21,15 +15,14 @@ const ChatBot = () => {
    // So conversationId.current will always hold the same UUID for the lifetime of the component.
    const conversationId = useRef(crypto.randomUUID());
 
-   const { register, handleSubmit, reset, formState } = useForm<FormData>();
-   const onSubmit = async ({ prompt }: FormData) => {
+   const onSubmit = async ({ prompt }: ChatFormData) => {
       try {
          setError('');
          setMessages((prev) => [
             ...prev,
             { message: prompt, sender: 'client', state: 'complete' },
          ]); // add user's message
-         reset({ prompt: '' });
+
          // inject server 'pending' message
          setMessages((prev) => [
             ...prev,
@@ -55,13 +48,6 @@ const ChatBot = () => {
       }
    };
 
-   const onKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-      if (e.key == 'Enter' && !e.shiftKey) {
-         e.preventDefault(); // avoid default behavior of enter key
-         handleSubmit(onSubmit)();
-      }
-   };
-
    // Messages div use flex-1 and form div uses flex-0 within the parent flex-col chatarea component
    // this means that the messages will grow take up all remaining area that is not required for rendering the form
    // which is pushed to the bottom.
@@ -73,30 +59,7 @@ const ChatBot = () => {
       <div id="chatArea" className="flex flex-col h-full w-full">
          <MessageList messages={messages} />
          {error && <p className="text-red-500">{error}</p>}
-         <form
-            onSubmit={handleSubmit(onSubmit)}
-            onKeyDown={onKeyDown}
-            className="flex flex-0 flex-col gap-2 border-2 p-4 rounded-3xl"
-         >
-            <textarea
-               {...register('prompt', {
-                  required: true,
-                  validate: (data) => data.trim().length > 0,
-               })}
-               autoFocus
-               className="w-full border-0 focus:outline-0 resize-none"
-               placeholder="Ask anything"
-               maxLength={1000}
-            />
-
-            <Button
-               type="submit"
-               disabled={!formState.isValid}
-               className="rounded-full w-9 h-9 self-end"
-            >
-               <FaArrowUp />
-            </Button>
-         </form>
+         <ChatInput onSubmit={onSubmit} />
       </div>
    );
 };
