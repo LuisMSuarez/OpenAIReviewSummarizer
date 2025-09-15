@@ -36,7 +36,7 @@ const ChatBot = () => {
          ...prev,
          { message: prompt, sender: 'client', state: 'complete' },
       ]); // add user's message
-      reset();
+      reset({ prompt: '' });
       // inject server 'pending' message
       setMessages((prev) => [
          ...prev,
@@ -92,6 +92,7 @@ const ChatBot = () => {
                   required: true,
                   validate: (data) => data.trim().length > 0,
                })}
+               autoFocus
                className="w-full border-0 focus:outline-0 resize-none"
                placeholder="Ask anything"
                maxLength={1000}
