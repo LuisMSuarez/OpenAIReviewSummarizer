@@ -59,9 +59,14 @@ const ChatBot = () => {
       }
    };
 
+   // Messages div use flex-1 and form div uses flex-0 within the parent flex-col chatarea component
+   // this means that the messages will grow take up all remaining area that is not required for rendering the form
+   // which is pushed to the bottom.
+   // The overall height of the chat area is h-full, 100% of the height that its parent will allow
+   // in this case, the parent is in app.tsx, where the chatbot is rendered, most likely h-screen, 100% of the viewport height
    return (
-      <div id="chatArea">
-         <div id="messages" className="flex flex-col gap-3 mb-2">
+      <div id="chatArea" className="flex flex-col h-full">
+         <div id="messages" className="flex flex-col flex-1 gap-3 mb-2">
             {messages.map((message, index) => (
                <div
                   key={index}
@@ -75,7 +80,7 @@ const ChatBot = () => {
             onSubmit={handleSubmit(onSubmit)}
             onKeyDown={onKeyDown}
             ref={formRef}
-            className="flex flex-col gap-2 border-2 p-4 rounded-3xl"
+            className="flex flex-0 flex-col gap-2 border-2 p-4 rounded-3xl"
          >
             <textarea
                {...register('prompt', {
