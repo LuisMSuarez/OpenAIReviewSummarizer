@@ -1,8 +1,8 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import './Message.css';
-import type { ChatMessage } from './ChatBot';
 import Thinking from './Thinking';
+import type { ChatMessage } from '@/entities/ChatMessage';
 
 interface Props {
    message: ChatMessage;

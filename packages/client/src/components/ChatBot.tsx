@@ -2,17 +2,12 @@ import { useForm } from 'react-hook-form';
 import { Button } from './ui/button';
 import { FaArrowUp } from 'react-icons/fa';
 import axios from 'axios';
-import { useEffect, useRef, useState } from 'react';
-import Message from './Message';
+import { useRef, useState } from 'react';
+import MessageList from './MessageList';
+import type { ChatMessage } from '@/entities/ChatMessage';
 
 type FormData = {
    prompt: string;
-};
-
-export type ChatMessage = {
-   message: string;
-   sender: 'client' | 'server';
-   state: 'pending' | 'complete';
 };
 
 type ChatResponse = {
@@ -25,13 +20,8 @@ const ChatBot = () => {
    // useRef(...) stores that value in a ref object that persists across re-renders.
    // So conversationId.current will always hold the same UUID for the lifetime of the component.
    const conversationId = useRef(crypto.randomUUID());
-   const lastMessageRef = useRef<HTMLDivElement | null>(null);
+
    const { register, handleSubmit, reset, formState } = useForm<FormData>();
-   useEffect(() => {
-      // sas messages are added from the client or server,
-      // scroll down to the last message in a smooth transition
-      lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
-   }, [messages]);
    const onSubmit = async ({ prompt }: FormData) => {
       try {
          setError('');
@@ -81,21 +71,8 @@ const ChatBot = () => {
    // if the content fits, no scrollbar is shown
    return (
       <div id="chatArea" className="flex flex-col h-full w-full">
-         <div
-            id="messages"
-            className="flex flex-col flex-1 gap-3 mb-2 overflow-y-auto"
-         >
-            {messages.map((message, index) => (
-               <div
-                  key={index}
-                  ref={index == messages.length - 1 ? lastMessageRef : null}
-                  className={`flex ${message.sender === 'client' ? 'self-start' : 'self-end'}`}
-               >
-                  <Message message={message} />
-               </div>
-            ))}
-            {error && <p className="text-red-500">{error}</p>}
-         </div>
+         <MessageList messages={messages} />
+         {error && <p className="text-red-500">{error}</p>}
          <form
             onSubmit={handleSubmit(onSubmit)}
             onKeyDown={onKeyDown}
