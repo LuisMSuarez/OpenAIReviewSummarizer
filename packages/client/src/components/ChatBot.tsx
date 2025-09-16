@@ -3,6 +3,14 @@ import { useRef, useState } from 'react';
 import MessageList from './MessageList';
 import type { ChatMessage } from '@/entities/ChatMessage';
 import ChatInput, { type ChatFormData } from './ChatInput';
+import popSound from '@/assets/sounds/pop.mp3';
+import notificationSound from '@/assets/sounds/notification.mp3';
+
+const userMsgAudio = new Audio(popSound);
+userMsgAudio.volume = 0.2;
+
+const serverMsgAudio = new Audio(notificationSound);
+serverMsgAudio.volume = 0.2;
 
 type ChatApiResponse = {
    message: string;
@@ -17,6 +25,7 @@ const ChatBot = () => {
 
    const onSubmit = async ({ prompt }: ChatFormData) => {
       try {
+         userMsgAudio.play();
          setError('');
          setMessages((prev) => [
             ...prev,
@@ -32,6 +41,7 @@ const ChatBot = () => {
             conversationId: conversationId.current,
          });
 
+         serverMsgAudio.play();
          setMessages((prev) => [
             ...prev,
             { message: data.message, sender: 'server', state: 'complete' },
