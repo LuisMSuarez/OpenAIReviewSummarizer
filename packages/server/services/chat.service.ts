@@ -1,8 +1,11 @@
+import fs from 'fs';
+import path from 'path';
 import OpenAI from 'openai';
 import {
    ConversationRepository,
    conversationRepository,
 } from '../repositories/conversation.repository';
+import template from '../prompts/chatbot.themepark.txt';
 
 interface ChatResponse {
    id: string;
@@ -21,6 +24,7 @@ class ChatService {
    ): Promise<ChatResponse> {
       const response = await this.openAiClient.responses.create({
          model: 'gpt-4o-mini',
+         instructions,
          input: prompt,
          temperature: 0.2,
          max_output_tokens: 200,
@@ -42,6 +46,12 @@ class ChatService {
 const openAiClient = new OpenAI({
    apiKey: process.env.OPENAI_API_KEY,
 });
+
+const parkInfo = fs.readFileSync(
+   path.join(__dirname, '..', 'prompts', 'WonderWorld.md'),
+   'utf-8'
+);
+const instructions = template.replace('{{parkInfo', parkInfo);
 
 export const chatService = new ChatService(
    openAiClient,
