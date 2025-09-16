@@ -1,16 +1,10 @@
-import { useForm } from 'react-hook-form';
-import { Button } from './ui/button';
-import { FaArrowUp } from 'react-icons/fa';
 import axios from 'axios';
 import { useRef, useState } from 'react';
 import MessageList from './MessageList';
 import type { ChatMessage } from '@/entities/ChatMessage';
+import ChatInput, { type ChatFormData } from './ChatInput';
 
-type FormData = {
-   prompt: string;
-};
-
-type ChatResponse = {
+type ChatApiResponse = {
    message: string;
 };
 
@@ -21,44 +15,34 @@ const ChatBot = () => {
    // So conversationId.current will always hold the same UUID for the lifetime of the component.
    const conversationId = useRef(crypto.randomUUID());
 
-   const { register, handleSubmit, reset, formState } = useForm<FormData>();
-   const onSubmit = async ({ prompt }: FormData) => {
+   const onSubmit = async ({ prompt }: ChatFormData) => {
       try {
          setError('');
          setMessages((prev) => [
             ...prev,
             { message: prompt, sender: 'client', state: 'complete' },
-         ]); // add user's message
-         reset({ prompt: '' });
-         // inject server 'pending' message
+         ]); // Add user's message using prev syntax to ensure we get latest copy of state
+
          setMessages((prev) => [
             ...prev,
             { message: '...', sender: 'server', state: 'pending' },
-         ]); // using prev syntax to ensure we get latest copy of state
-         const { data } = await axios.post<ChatResponse>('/api/chat', {
+         ]); // Inject server 'pending' message
+         const { data } = await axios.post<ChatApiResponse>('/api/chat', {
             prompt,
             conversationId: conversationId.current,
          });
-         // add the completed message
+
          setMessages((prev) => [
             ...prev,
             { message: data.message, sender: 'server', state: 'complete' },
-         ]);
+         ]); // Add the completed message
       } catch (error) {
          console.error(error);
          setError('Sorry, something went wrong, please try again!');
       } finally {
-         // always remove pending message from the server
          setMessages((prev) => [
             ...prev.filter((message) => message.state != 'pending'),
-         ]);
-      }
-   };
-
-   const onKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-      if (e.key == 'Enter' && !e.shiftKey) {
-         e.preventDefault(); // avoid default behavior of enter key
-         handleSubmit(onSubmit)();
+         ]); // Always remove "pending" message from the server
       }
    };
 
@@ -73,30 +57,7 @@ const ChatBot = () => {
       <div id="chatArea" className="flex flex-col h-full w-full">
          <MessageList messages={messages} />
          {error && <p className="text-red-500">{error}</p>}
-         <form
-            onSubmit={handleSubmit(onSubmit)}
-            onKeyDown={onKeyDown}
-            className="flex flex-0 flex-col gap-2 border-2 p-4 rounded-3xl"
-         >
-            <textarea
-               {...register('prompt', {
-                  required: true,
-                  validate: (data) => data.trim().length > 0,
-               })}
-               autoFocus
-               className="w-full border-0 focus:outline-0 resize-none"
-               placeholder="Ask anything"
-               maxLength={1000}
-            />
-
-            <Button
-               type="submit"
-               disabled={!formState.isValid}
-               className="rounded-full w-9 h-9 self-end"
-            >
-               <FaArrowUp />
-            </Button>
-         </form>
+         <ChatInput onSubmit={onSubmit} />
       </div>
    );
 };
