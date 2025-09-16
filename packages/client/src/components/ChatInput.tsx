@@ -12,10 +12,14 @@ interface Props {
 
 const ChatInput = ({ onSubmit }: Props) => {
    const { register, handleSubmit, reset, formState } = useForm<ChatFormData>();
+
+   // Main submit handler: resets the prompt and invokes callback, all wraped in the react-hook-form handleSubmit wrapper
    const submit = handleSubmit((data) => {
       reset({ prompt: '' });
       onSubmit(data);
    });
+
+   // Handler for when the user presses 'enter' in the chat window
    const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
       if (e.key == 'Enter' && !e.shiftKey) {
          e.preventDefault(); // avoid default behavior of enter key

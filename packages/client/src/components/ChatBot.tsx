@@ -4,7 +4,7 @@ import MessageList from './MessageList';
 import type { ChatMessage } from '@/entities/ChatMessage';
 import ChatInput, { type ChatFormData } from './ChatInput';
 
-type ChatResponse = {
+type ChatApiResponse = {
    message: string;
 };
 
@@ -21,30 +21,28 @@ const ChatBot = () => {
          setMessages((prev) => [
             ...prev,
             { message: prompt, sender: 'client', state: 'complete' },
-         ]); // add user's message
+         ]); // Add user's message using prev syntax to ensure we get latest copy of state
 
-         // inject server 'pending' message
          setMessages((prev) => [
             ...prev,
             { message: '...', sender: 'server', state: 'pending' },
-         ]); // using prev syntax to ensure we get latest copy of state
-         const { data } = await axios.post<ChatResponse>('/api/chat', {
+         ]); // Inject server 'pending' message
+         const { data } = await axios.post<ChatApiResponse>('/api/chat', {
             prompt,
             conversationId: conversationId.current,
          });
-         // add the completed message
+
          setMessages((prev) => [
             ...prev,
             { message: data.message, sender: 'server', state: 'complete' },
-         ]);
+         ]); // Add the completed message
       } catch (error) {
          console.error(error);
          setError('Sorry, something went wrong, please try again!');
       } finally {
-         // always remove pending message from the server
          setMessages((prev) => [
             ...prev.filter((message) => message.state != 'pending'),
-         ]);
+         ]); // Always remove "pending" message from the server
       }
    };
 
