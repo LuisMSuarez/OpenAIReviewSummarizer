@@ -23,7 +23,7 @@ const Message = ({ message }: Props) => {
    return (
       <div
          onCopy={onCopyMessage}
-         className={`border-2 rounded-3xl p-4 max-w-xs markdown ${bgColor}`}
+         className={`border-2 rounded-3xl p-4 ${bgColor}`}
       >
          {state === 'pending' && <Thinking />}
          {state === 'complete' && (

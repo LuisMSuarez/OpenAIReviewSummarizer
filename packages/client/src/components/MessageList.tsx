@@ -22,7 +22,7 @@ const MessageList = ({ messages }: Props) => {
             <div
                key={index}
                ref={index == messages.length - 1 ? lastMessageRef : null}
-               className={`flex ${message.sender === 'client' ? 'self-start' : 'self-end'}`}
+               className={`flex px-3 py-1 max-w-md ${message.sender === 'client' ? 'self-start' : 'self-end'}`}
             >
                <Message message={message} />
             </div>
