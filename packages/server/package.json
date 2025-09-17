@@ -5,7 +5,9 @@
    "private": true,
    "scripts": {
       "start": "bun run index.ts",
-      "dev": "bun --watch index.ts"
+      "dev": "bun --watch index.ts",
+      "build": "bun build index.ts --outdir dist --target node && cp prompts/WonderWorld.md dist/prompts/WonderWorld.md",
+      "dist": "bun run ./dist/index.js"
    },
    "devDependencies": {
       "@types/bun": "latest",
