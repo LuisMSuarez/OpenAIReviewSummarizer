@@ -1,0 +1,38 @@
+name: Build with Bun
+
+on:
+   push:
+      branches: [main]
+   pull_request:
+      branches: [main]
+
+jobs:
+   build:
+      runs-on: ubuntu-latest
+
+      steps:
+         - name: Checkout code
+           uses: actions/checkout@v3
+
+         - name: Install Bun
+           run: |
+              curl -fsSL https://bun.sh/install | bash
+              echo "$HOME/.bun/bin" >> $GITHUB_PATH
+
+         - name: Install dependencies
+           run: bun install
+
+         - name: Build
+           run: bun run build
+
+         - name: Upload client artifact for deployment job
+           uses: actions/upload-artifact@v4
+           with:
+              name: client-app
+              path: packages/client/dist
+
+         - name: Upload server artifact for deployment job
+           uses: actions/upload-artifact@v4
+           with:
+              name: server-app
+              path: packages/server/dist
