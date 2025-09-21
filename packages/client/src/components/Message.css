@@ -8,3 +8,7 @@
    border: 1px solid;
    padding: 8px;
 }
+
+.markdown a {
+   color: #dc143c;
+}
