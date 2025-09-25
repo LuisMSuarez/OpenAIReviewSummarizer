@@ -1,4 +1,5 @@
 -- Refer to prompts/sampleData.txt
+-- run in msql command tool with source /packages/server/prisma/sampleData.sql
 
 -- Insert Products
 INSERT INTO products (name, description, price) VALUES
