@@ -29,6 +29,7 @@ jobs:
            run: bun install
 
          - name: Generate Prisma Client # files will be built to /server/generated/prisma
+           working-directory: packages/server
            run: bunx prisma generate
 
          - name: Build
