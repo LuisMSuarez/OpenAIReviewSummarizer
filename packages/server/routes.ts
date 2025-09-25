@@ -1,4 +1,4 @@
-import express, { response } from 'express';
+import express from 'express';
 import type { Request, Response } from 'express';
 import { chatController } from './controllers/chat.controller';
 import { PrismaClient } from './generated/prisma';
