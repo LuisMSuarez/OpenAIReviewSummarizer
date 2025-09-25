@@ -15,7 +15,12 @@ RUN bun install
 # Copy the rest of the monorepo
 COPY . .
 
-# Build both packages
+# Generate Prisma client in server package
+WORKDIR /app/packages/server
+RUN bunx prisma generate
+
+# Return to root and build both packages
+WORKDIR /app
 RUN bun run build
 
 # Expose ports (adjust as needed)
