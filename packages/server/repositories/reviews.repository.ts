@@ -7,12 +7,10 @@ export class ReviewsRepository {
       this.prisma = prisma ?? new PrismaClient();
    }
    async getReviews(productId: number): Promise<Review[]> {
-      const reviews = await this.prisma.review.findMany({
+      return await this.prisma.review.findMany({
          where: { productId },
          orderBy: { createdAt: 'desc' },
       });
-
-      return reviews;
    }
 }
 

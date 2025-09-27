@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
-import { reviewsRepository } from '../repositories/reviews.repository';
+import { reviewService } from '../services/review.service';
 
-export class SummarizerController {
+export class ReviewController {
    async getProductReviews(req: Request, res: Response) {
       const productId = Number(req.params.id);
       if (isNaN(productId)) {
@@ -9,9 +9,9 @@ export class SummarizerController {
          return;
       }
 
-      var reviews = await reviewsRepository.getReviews(productId);
+      var reviews = await reviewService.getReviews(productId);
       res.json(reviews);
    }
 }
 
-export const summarizerController = new SummarizerController();
+export const reviewController = new ReviewController();
