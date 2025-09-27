@@ -13,4 +13,9 @@ router.post('/api/chat', chatController.sendMessage);
 
 router.get('/api/products/:id/reviews', reviewController.getProductReviews);
 
+router.post(
+   '/api/products/:id/summaries',
+   reviewController.createReviewSummary
+);
+
 export default router;
