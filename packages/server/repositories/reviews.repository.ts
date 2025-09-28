@@ -6,10 +6,11 @@ export class ReviewsRepository {
    constructor(prisma?: PrismaClient) {
       this.prisma = prisma ?? new PrismaClient();
    }
-   async getReviews(productId: number): Promise<Review[]> {
+   async getReviews(productId: number, limit?: number): Promise<Review[]> {
       return await this.prisma.review.findMany({
          where: { productId },
          orderBy: { createdAt: 'desc' },
+         take: limit,
       });
    }
 }
