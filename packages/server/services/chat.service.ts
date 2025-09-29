@@ -1,11 +1,11 @@
 import fs from 'fs';
 import path from 'path';
-import OpenAI from 'openai';
 import {
    ConversationRepository,
    conversationRepository,
 } from '../repositories/conversation.repository';
 import template from '../prompts/chatbot.themepark.txt';
+import { LlmProvider, llmProvider } from '../providers/llm.provider';
 
 interface ChatResponse {
    id: string;
@@ -14,7 +14,7 @@ interface ChatResponse {
 
 class ChatService {
    constructor(
-      private readonly openAiClient: OpenAI,
+      private readonly llmProvider: LlmProvider,
       private readonly conversationRepository: ConversationRepository
    ) {}
 
@@ -22,13 +22,10 @@ class ChatService {
       prompt: string,
       conversationId: string
    ): Promise<ChatResponse> {
-      const response = await this.openAiClient.responses.create({
-         model: 'gpt-4o-mini',
+      const response = await this.llmProvider.generateResponse({
+         prompt,
          instructions,
-         input: prompt,
-         temperature: 0.2,
-         max_output_tokens: 200,
-         previous_response_id:
+         previousResponseId:
             this.conversationRepository.getLastResponseId(conversationId),
       });
 
@@ -38,14 +35,10 @@ class ChatService {
       );
       return {
          id: conversationId,
-         message: response.output_text,
+         message: response.message,
       };
    }
 }
-
-const openAiClient = new OpenAI({
-   apiKey: process.env.OPENAI_API_KEY,
-});
 
 // Use import.meta.dir for bundler-safe, runtime-resolved path
 const parkInfo = fs.readFileSync(
@@ -54,7 +47,4 @@ const parkInfo = fs.readFileSync(
 );
 const instructions = template.replace('{{parkInfo}}', parkInfo);
 
-export const chatService = new ChatService(
-   openAiClient,
-   conversationRepository
-);
+export const chatService = new ChatService(llmProvider, conversationRepository);
