@@ -22,7 +22,12 @@ class ReviewService {
          ${joinedReviews}
       `;
 
-      return (await this.llmProvider.generateResponse({ prompt })).message;
+      return (
+         await this.llmProvider.generateResponse({
+            prompt,
+            maxOutputTokens: 500,
+         })
+      ).message;
    }
 }
 

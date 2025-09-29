@@ -25,6 +25,7 @@ class ChatService {
       const response = await this.llmProvider.generateResponse({
          prompt,
          instructions,
+         maxOutputTokens: 500,
          previousResponseId:
             this.conversationRepository.getLastResponseId(conversationId),
       });

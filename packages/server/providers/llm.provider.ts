@@ -4,6 +4,7 @@ type GenerateResponseQuery = {
    prompt: string;
    instructions?: string;
    previousResponseId?: string;
+   maxOutputTokens?: number;
 };
 
 type GenerateResponseResult = {
@@ -17,6 +18,7 @@ export class LlmProvider {
       prompt,
       instructions,
       previousResponseId,
+      maxOutputTokens,
    }: GenerateResponseQuery): Promise<GenerateResponseResult> {
       const response = await this.openAiClient.responses.create({
          model: 'gpt-4o-mini',
@@ -24,7 +26,7 @@ export class LlmProvider {
          instructions,
          previous_response_id: previousResponseId,
          temperature: 0.2,
-         max_output_tokens: 500,
+         max_output_tokens: maxOutputTokens,
       });
 
       return { message: response.output_text, id: response.id };
