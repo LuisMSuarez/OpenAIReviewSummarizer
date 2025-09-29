@@ -1,12 +1,12 @@
-import OpenAI from 'openai';
 import type { Review } from '../generated/prisma';
 import {
    ReviewsRepository,
    reviewsRepository,
 } from '../repositories/reviews.repository';
+import { llmProvider, type LlmProvider } from '../providers/llm.provider';
 
 class ReviewService {
-   constructor(private readonly openAiClient: OpenAI) {}
+   constructor(private readonly llmProvider: LlmProvider) {}
 
    async getReviews(productId: number): Promise<Review[]> {
       return await reviewsRepository.getReviews(productId);
@@ -22,19 +22,13 @@ class ReviewService {
          ${joinedReviews}
       `;
 
-      const response = await this.openAiClient.responses.create({
-         model: 'gpt-4o-mini',
-         input: prompt,
-         temperature: 0.2,
-         max_output_tokens: 500,
-      });
-
-      return response.output_text;
+      return (
+         await this.llmProvider.generateResponse({
+            prompt,
+            maxOutputTokens: 500,
+         })
+      ).message;
    }
 }
 
-const openAiClient = new OpenAI({
-   apiKey: process.env.OPENAI_API_KEY,
-});
-
-export const reviewService = new ReviewService(openAiClient);
+export const reviewService = new ReviewService(llmProvider);
