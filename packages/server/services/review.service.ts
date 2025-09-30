@@ -17,15 +17,21 @@ class ReviewService {
    }
 
    async createReview(productId: number): Promise<string> {
-      // get the last 10 reviews
-      var reviews = await reviewsRepository.getReviews(productId, 10);
+      const existingSummary =
+         await this.reviewsRepository.getReviewSummary(productId);
+      if (existingSummary && existingSummary.expiresAt > new Date()) {
+         return existingSummary.content;
+      }
+
+      // regenerate the summary based on the 10 most recent reviews
+      const reviews = await reviewsRepository.getReviews(productId, 10);
       const joinedReviews = reviews.map((r) => r.content).join('\n\n');
       const prompt = template.replace('{{ reviews }}', joinedReviews);
       const { message: summary } = await this.llmProvider.generateResponse({
          prompt,
          maxOutputTokens: 500,
       });
-      await this.reviewsRepository.storeReviewSummary(productId, summary);
+      await this.reviewsRepository.upsertReviewSummary(productId, summary);
       return summary;
    }
 }
