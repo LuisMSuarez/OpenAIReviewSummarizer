@@ -6,7 +6,7 @@ import {
 import { llmProvider, type LlmProvider } from '../providers/llm.provider';
 import template from '../prompts/summarizeReview.txt';
 
-class ReviewService {
+export class ReviewService {
    constructor(
       private readonly llmProvider: LlmProvider,
       private readonly reviewsRepository: ReviewsRepository
@@ -16,7 +16,7 @@ class ReviewService {
       return await reviewsRepository.getReviews(productId);
    }
 
-   async createReview(productId: number): Promise<string> {
+   async createReview(productId: number): Promise<string | null> {
       const existingSummary =
          await this.reviewsRepository.getReviewSummary(productId);
       if (existingSummary && existingSummary.expiresAt > new Date()) {
@@ -25,6 +25,10 @@ class ReviewService {
 
       // regenerate the summary based on the 10 most recent reviews
       const reviews = await reviewsRepository.getReviews(productId, 10);
+      if (!reviews.length) {
+         return null;
+      }
+
       const joinedReviews = reviews.map((r) => r.content).join('\n\n');
       const prompt = template.replace('{{ reviews }}', joinedReviews);
       const { message: summary } = await this.llmProvider.generateResponse({
