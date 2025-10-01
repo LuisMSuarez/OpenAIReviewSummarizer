@@ -12,7 +12,7 @@ interface ChatResponse {
    message: string;
 }
 
-class ChatService {
+export class ChatService {
    constructor(
       private readonly llmProvider: LlmProvider,
       private readonly conversationRepository: ConversationRepository
