@@ -35,10 +35,13 @@ export class ReviewsRepository {
       });
    }
 
-   async getReviewSummary(productId: number): Promise<ReviewSummary | null> {
-      return await this.prisma.reviewSummary.findUnique({
-         where: { productId },
+   async getReviewSummary(productId: number): Promise<string | null> {
+      const summary = await this.prisma.reviewSummary.findFirst({
+         where: {
+            AND: [{ productId }, { expiresAt: { gt: new Date() } }],
+         },
       });
+      return summary ? summary.content : null;
    }
 }
 

@@ -13,18 +13,22 @@ export class ReviewService {
    ) {}
 
    async getReviews(productId: number): Promise<Review[]> {
-      return await reviewsRepository.getReviews(productId);
+      return await this.reviewsRepository.getReviews(productId);
    }
 
-   async createReview(productId: number): Promise<string | null> {
+   async getSummary(productId: number): Promise<string | null> {
+      return await this.reviewsRepository.getReviewSummary(productId);
+   }
+
+   async createSummary(productId: number): Promise<string | null> {
       const existingSummary =
          await this.reviewsRepository.getReviewSummary(productId);
-      if (existingSummary && existingSummary.expiresAt > new Date()) {
-         return existingSummary.content;
+      if (existingSummary) {
+         return existingSummary;
       }
 
       // regenerate the summary based on the 10 most recent reviews
-      const reviews = await reviewsRepository.getReviews(productId, 10);
+      const reviews = await this.reviewsRepository.getReviews(productId, 10);
       if (!reviews.length) {
          return null;
       }

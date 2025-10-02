@@ -10,11 +10,22 @@ export class ReviewController {
          return;
       }
 
-      var reviews = await reviewService.getReviews(productId);
-      res.json(reviews);
+      if (!(await productService.getProduct(productId))) {
+         res.status(404).json({
+            error: `Product with id ${productId} not found.`,
+         });
+         return;
+      }
+
+      const reviews = await reviewService.getReviews(productId);
+      const summary = await reviewService.getSummary(productId);
+      res.json({
+         reviews,
+         summary,
+      });
    }
 
-   async createReviewSummary(req: Request, res: Response) {
+   async createSummary(req: Request, res: Response) {
       const productId = Number(req.params.id);
       if (isNaN(productId)) {
          res.status(400).json({ error: 'Invalid product id.' });
@@ -26,7 +37,7 @@ export class ReviewController {
          });
          return;
       }
-      const summary = await reviewService.createReview(productId);
+      const summary = await reviewService.createSummary(productId);
       if (!summary) {
          res.status(400).json({
             error: `Cannot generate a review summary for product with id ${productId}.`,
