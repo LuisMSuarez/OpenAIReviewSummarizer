@@ -1,7 +1,10 @@
 import axios from 'axios';
 import Skeleton from 'react-loading-skeleton';
 import StarRating from './StarRating';
+import { HiSparkles } from 'react-icons/hi2';
 import { useQuery } from '@tanstack/react-query';
+import { Button } from '../ui/button';
+import { useState } from 'react';
 
 interface Props {
    productId: number;
@@ -21,12 +24,13 @@ type GetReviewsResponse = {
 };
 
 const ReviewList = ({ productId }: Props) => {
+   const [summaryRegenerated, setSummaryRegenerated] = useState(false);
    const {
       data: reviewData,
       isLoading,
       error,
    } = useQuery<GetReviewsResponse>({
-      queryKey: ['reviews', productId],
+      queryKey: ['reviews', productId, summaryRegenerated],
       queryFn: () => fetchReviews(),
    });
 
@@ -34,6 +38,14 @@ const ReviewList = ({ productId }: Props) => {
       const { data } = await axios.get<GetReviewsResponse>(
          `/api/products/${productId}/reviews`
       );
+      return data;
+   };
+
+   const generateSummary = async () => {
+      const { data } = await axios.post<GetReviewsResponse>(
+         `/api/products/${productId}/summaries`
+      );
+      setSummaryRegenerated(true);
       return data;
    };
 
@@ -59,17 +71,33 @@ const ReviewList = ({ productId }: Props) => {
       );
    }
 
+   if (!reviewData?.reviews.length) {
+      return null;
+   }
+
    return (
-      <div className="flex flex-col gap-5">
-         {reviewData?.reviews.map((review) => (
-            <div key={review.id}>
-               <div className="font-semibold">{review.author}</div>
-               <div>
-                  <StarRating value={review.rating} />
+      <div>
+         <div id="summary" className="mb-5">
+            {reviewData?.summary ? (
+               <p>{reviewData.summary}</p>
+            ) : (
+               <Button onClick={generateSummary}>
+                  <HiSparkles className="text-yellow-400" />
+                  Summarize
+               </Button>
+            )}
+         </div>
+         <div id="reviewlist" className="flex flex-col gap-5">
+            {reviewData?.reviews.map((review) => (
+               <div key={review.id}>
+                  <div className="font-semibold">{review.author}</div>
+                  <div>
+                     <StarRating value={review.rating} />
+                  </div>
+                  <p className="py-2">{review.content}</p>
                </div>
-               <p className="py-2">{review.content}</p>
-            </div>
-         ))}
+            ))}
+         </div>
       </div>
    );
 };
