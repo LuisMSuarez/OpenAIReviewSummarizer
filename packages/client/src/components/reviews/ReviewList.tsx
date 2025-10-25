@@ -23,8 +23,14 @@ type GetReviewsResponse = {
    reviews: Review[];
 };
 
+type SummarizeResponse = {
+   summary: string;
+};
+
 const ReviewList = ({ productId }: Props) => {
    const [summaryRegenerated, setSummaryRegenerated] = useState(false);
+   const [generatingSummary, setGeneratingSummary] = useState(false);
+
    const {
       data: reviewData,
       isLoading,
@@ -42,11 +48,16 @@ const ReviewList = ({ productId }: Props) => {
    };
 
    const generateSummary = async () => {
-      const { data } = await axios.post<GetReviewsResponse>(
-         `/api/products/${productId}/summaries`
-      );
-      setSummaryRegenerated(true);
-      return data;
+      setGeneratingSummary(true);
+      try {
+         const { data } = await axios.post<SummarizeResponse>(
+            `/api/products/${productId}/summaries`
+         );
+         setSummaryRegenerated(true);
+         return data;
+      } finally {
+         setGeneratingSummary(false);
+      }
    };
 
    if (isLoading) {
@@ -80,6 +91,10 @@ const ReviewList = ({ productId }: Props) => {
          <div id="summary" className="mb-5">
             {reviewData?.summary ? (
                <p>{reviewData.summary}</p>
+            ) : generatingSummary ? (
+               <div>
+                  <Skeleton count={3} /> {/* Review placeholder (2-liner) */}
+               </div>
             ) : (
                <Button onClick={generateSummary}>
                   <HiSparkles className="text-yellow-400" />
