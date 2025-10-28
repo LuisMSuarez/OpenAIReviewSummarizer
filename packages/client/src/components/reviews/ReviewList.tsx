@@ -1,10 +1,10 @@
 import axios from 'axios';
-import Skeleton from 'react-loading-skeleton';
 import StarRating from './StarRating';
 import { HiSparkles } from 'react-icons/hi2';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '../ui/button';
 import { useState } from 'react';
+import ReviewSkeleton from './ReviewSkeleton';
 
 interface Props {
    productId: number;
@@ -64,11 +64,7 @@ const ReviewList = ({ productId }: Props) => {
       return (
          <div className="flex flex-col gap-5">
             {[1, 2, 3].map((placeholder) => (
-               <div key={placeholder}>
-                  <Skeleton width={150} /> {/* User name placeholder */}
-                  <Skeleton width={100} /> {/* Stars placeholder */}
-                  <Skeleton count={2} /> {/* Review placeholder (2-liner) */}
-               </div>
+               <ReviewSkeleton key={placeholder} />
             ))}
          </div>
       );
@@ -93,10 +89,10 @@ const ReviewList = ({ productId }: Props) => {
                <p>{reviewData.summary}</p>
             ) : generatingSummary ? (
                <div>
-                  <Skeleton count={3} /> {/* Review placeholder (2-liner) */}
+                  <ReviewSkeleton />
                </div>
             ) : (
-               <Button onClick={generateSummary}>
+               <Button onClick={generateSummary} className="cursor-pointer">
                   <HiSparkles className="text-yellow-400" />
                   Summarize
                </Button>
