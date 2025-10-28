@@ -30,6 +30,7 @@ type SummarizeResponse = {
 const ReviewList = ({ productId }: Props) => {
    const [summaryRegenerated, setSummaryRegenerated] = useState(false);
    const [generatingSummary, setGeneratingSummary] = useState(false);
+   const [summaryGenError, setSummaryGenError] = useState('');
 
    const {
       data: reviewData,
@@ -49,12 +50,16 @@ const ReviewList = ({ productId }: Props) => {
 
    const generateSummary = async () => {
       setGeneratingSummary(true);
+      setSummaryGenError('');
       try {
          const { data } = await axios.post<SummarizeResponse>(
             `/api/products/${productId}/summaries`
          );
          setSummaryRegenerated(true);
          return data;
+      } catch (error) {
+         console.error(error);
+         setSummaryGenError('Could not summarize the reviews. Try again.');
       } finally {
          setGeneratingSummary(false);
       }
@@ -96,6 +101,9 @@ const ReviewList = ({ productId }: Props) => {
                   <HiSparkles className="text-yellow-400" />
                   Summarize
                </Button>
+            )}
+            {summaryGenError && (
+               <p className="text-red-500">{summaryGenError}</p>
             )}
          </div>
          <div id="reviewlist" className="flex flex-col gap-5">
