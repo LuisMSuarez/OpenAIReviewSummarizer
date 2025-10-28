@@ -1,9 +1,8 @@
 import axios from 'axios';
 import StarRating from './StarRating';
 import { HiSparkles } from 'react-icons/hi2';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button } from '../ui/button';
-import { useState } from 'react';
 import ReviewSkeleton from './ReviewSkeleton';
 
 interface Props {
@@ -28,9 +27,14 @@ type SummarizeResponse = {
 };
 
 const ReviewList = ({ productId }: Props) => {
-   const [summaryRegenerated, setSummaryRegenerated] = useState(false);
-   const [generatingSummary, setGeneratingSummary] = useState(false);
-   const [summaryGenError, setSummaryGenError] = useState('');
+   const {
+      mutate: handleSummarize,
+      isPending: generatingSummary,
+      isSuccess: summaryRegenerated,
+      isError: summaryGenError,
+   } = useMutation<SummarizeResponse>({
+      mutationFn: () => generateSummary(),
+   });
 
    const {
       data: reviewData,
@@ -49,20 +53,10 @@ const ReviewList = ({ productId }: Props) => {
    };
 
    const generateSummary = async () => {
-      setGeneratingSummary(true);
-      setSummaryGenError('');
-      try {
-         const { data } = await axios.post<SummarizeResponse>(
-            `/api/products/${productId}/summaries`
-         );
-         setSummaryRegenerated(true);
-         return data;
-      } catch (error) {
-         console.error(error);
-         setSummaryGenError('Could not summarize the reviews. Try again.');
-      } finally {
-         setGeneratingSummary(false);
-      }
+      const { data } = await axios.post<SummarizeResponse>(
+         `/api/products/${productId}/summaries`
+      );
+      return data;
    };
 
    if (isLoading) {
@@ -97,7 +91,10 @@ const ReviewList = ({ productId }: Props) => {
                   <ReviewSkeleton />
                </div>
             ) : (
-               <Button onClick={generateSummary} className="cursor-pointer">
+               <Button
+                  onClick={() => handleSummarize()}
+                  className="cursor-pointer"
+               >
                   <HiSparkles className="text-yellow-400" />
                   Summarize
                </Button>
