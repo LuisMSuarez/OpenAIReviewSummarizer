@@ -1,4 +1,3 @@
-import axios from 'axios';
 import StarRating from './StarRating';
 import { HiSparkles } from 'react-icons/hi2';
 import { useMutation, useQuery } from '@tanstack/react-query';
