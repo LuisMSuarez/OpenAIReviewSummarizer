@@ -27,21 +27,12 @@ type SummarizeResponse = {
 };
 
 const ReviewList = ({ productId }: Props) => {
-   const {
-      mutate: handleSummarize,
-      isPending: generatingSummary,
-      isSuccess: summaryRegenerated,
-      isError: summaryGenError,
-   } = useMutation<SummarizeResponse>({
+   const reviewSummaryMutation = useMutation<SummarizeResponse>({
       mutationFn: () => generateSummary(),
    });
 
-   const {
-      data: reviewData,
-      isLoading,
-      error,
-   } = useQuery<GetReviewsResponse>({
-      queryKey: ['reviews', productId, summaryRegenerated],
+   const getReviewsQuery = useQuery<GetReviewsResponse>({
+      queryKey: ['reviews', productId, reviewSummaryMutation.isSuccess],
       queryFn: () => fetchReviews(),
    });
 
@@ -59,7 +50,7 @@ const ReviewList = ({ productId }: Props) => {
       return data;
    };
 
-   if (isLoading) {
+   if (getReviewsQuery.isLoading) {
       return (
          <div className="flex flex-col gap-5">
             {[1, 2, 3].map((placeholder) => (
@@ -69,7 +60,7 @@ const ReviewList = ({ productId }: Props) => {
       );
    }
 
-   if (error) {
+   if (getReviewsQuery.error) {
       return (
          <p className="text-red-500">
             Could not fetch reviews, please try again.
@@ -77,34 +68,36 @@ const ReviewList = ({ productId }: Props) => {
       );
    }
 
-   if (!reviewData?.reviews.length) {
+   if (!getReviewsQuery.data?.reviews.length) {
       return null;
    }
 
    return (
       <div>
          <div id="summary" className="mb-5">
-            {reviewData?.summary ? (
-               <p>{reviewData.summary}</p>
-            ) : generatingSummary ? (
+            {getReviewsQuery.data?.summary ? (
+               <p>{getReviewsQuery.data?.summary}</p>
+            ) : reviewSummaryMutation.isPending ? (
                <div>
                   <ReviewSkeleton />
                </div>
             ) : (
                <Button
-                  onClick={() => handleSummarize()}
+                  onClick={() => reviewSummaryMutation.mutate()}
                   className="cursor-pointer"
                >
                   <HiSparkles className="text-yellow-400" />
                   Summarize
                </Button>
             )}
-            {summaryGenError && (
-               <p className="text-red-500">{summaryGenError}</p>
+            {reviewSummaryMutation.isError && (
+               <p className="text-red-500">
+                  Could not generate review summary, please try again.
+               </p>
             )}
          </div>
          <div id="reviewlist" className="flex flex-col gap-5">
-            {reviewData?.reviews.map((review) => (
+            {getReviewsQuery.data?.reviews.map((review) => (
                <div key={review.id}>
                   <div className="font-semibold">{review.author}</div>
                   <div>
