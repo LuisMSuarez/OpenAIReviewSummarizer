@@ -34,10 +34,15 @@ export class ReviewService {
       }
 
       const joinedReviews = reviews.map((r) => r.content).join('\n\n');
+      /*
+      Replace if you want to use OpenAI instead of an open-source model
       const prompt = template.replace('{{ reviews }}', joinedReviews);
       const { message: summary } = await this.llmProvider.generateResponse({
          prompt,
          maxOutputTokens: 500,
+      }); */
+      const { summary } = await this.llmProvider.summarizeReviews({
+         text: joinedReviews,
       });
       await this.reviewsRepository.upsertReviewSummary(productId, summary);
       return summary;

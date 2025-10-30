@@ -1,4 +1,6 @@
 import OpenAI from 'openai';
+import { InferenceClient } from '@huggingface/inference';
+import summarizeReviewPrompt from '../prompts/summarizeReviewLlama.txt';
 
 type GenerateResponseQuery = {
    prompt: string;
@@ -10,6 +12,14 @@ type GenerateResponseQuery = {
 type GenerateResponseResult = {
    message: string;
    id: string;
+};
+
+type SummarizeTextQuery = {
+   text: string;
+};
+
+type SummarizeTextResult = {
+   summary: string;
 };
 
 export class LlmProvider {
@@ -31,10 +41,42 @@ export class LlmProvider {
 
       return { message: response.output_text, id: response.id };
    }
+
+   async summarize({ text }: SummarizeTextQuery): Promise<SummarizeTextResult> {
+      const output = await inferenceClient.summarization({
+         model: 'facebook/bart-large-cnn',
+         inputs: text,
+         provider: 'hf-inference',
+      });
+      return { summary: output.summary_text };
+   }
+
+   async summarizeReviews({
+      text: reviews,
+   }: SummarizeTextQuery): Promise<SummarizeTextResult> {
+      const chatCompletion = await inferenceClient.chatCompletion({
+         provider: 'novita',
+         model: 'meta-llama/Llama-3.1-8B-Instruct',
+         messages: [
+            {
+               role: 'system',
+               content: summarizeReviewPrompt,
+            },
+            {
+               role: 'user',
+               content: reviews,
+            },
+         ],
+      });
+
+      return { summary: chatCompletion?.choices[0]?.message.content ?? '' };
+   }
 }
 
 const openAiClient = new OpenAI({
    apiKey: process.env.OPENAI_API_KEY,
 });
+
+const inferenceClient = new InferenceClient(process.env.HF_TOKEN);
 
 export const llmProvider = new LlmProvider(openAiClient);
