@@ -46,7 +46,7 @@ const ReviewList = ({ productId }: Props) => {
    }
 
    return (
-      <div>
+      <div className="flex flex-col w-3/4">
          <div id="summary" className="mb-5">
             {getReviewsQuery.data?.summary ? (
                <p>{getReviewsQuery.data?.summary}</p>
