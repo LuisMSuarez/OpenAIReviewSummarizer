@@ -12,7 +12,7 @@ Lightweight web app displays product reviews (from a MySql database) and produce
 
 ## Highlights
 
-Scalable and durable summarization of arbitrary review sets.
+Durable summarization of arbitrary review sets.
 Configurable summary length and level of detail.
 Exposes a simple API for programmatic use.
 Minimal setup — monorepo runs locally, in Docker, or deployed to cloud platforms.
